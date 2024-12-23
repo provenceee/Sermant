@@ -45,6 +45,8 @@ public abstract class AbstractThreadWrapper<T> {
 
     private final boolean cannotTransmit;
 
+    private final long threadId;
+
     /**
      * 构造方法
      *
@@ -55,7 +57,7 @@ public abstract class AbstractThreadWrapper<T> {
      * @param cannotTransmit 执行方法之前是否需要删除线程变量
      */
     public AbstractThreadWrapper(Runnable runnable, Callable<T> callable, RequestTag requestTag,
-            RequestData requestData, boolean cannotTransmit) {
+        RequestData requestData, boolean cannotTransmit) {
         this.runnable = runnable;
         this.callable = callable;
         if (cannotTransmit) {
@@ -66,6 +68,7 @@ public abstract class AbstractThreadWrapper<T> {
             this.requestData = requestData;
         }
         this.cannotTransmit = cannotTransmit;
+        this.threadId = Thread.currentThread().getId();
     }
 
     /**
@@ -116,7 +119,9 @@ public abstract class AbstractThreadWrapper<T> {
     }
 
     private void after() {
-        ThreadLocalUtils.removeRequestTag();
-        ThreadLocalUtils.removeRequestData();
+        if (threadId != Thread.currentThread().getId()) {
+            ThreadLocalUtils.removeRequestTag();
+            ThreadLocalUtils.removeRequestData();
+        }
     }
 }

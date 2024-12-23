@@ -25,6 +25,7 @@ import com.huawei.flowcontrol.common.entity.RequestEntity.RequestType;
 import com.huawei.flowcontrol.common.handler.retry.AbstractRetry;
 import com.huawei.flowcontrol.common.handler.retry.Retry;
 import com.huawei.flowcontrol.common.handler.retry.RetryContext;
+import com.huawei.flowcontrol.common.util.StringUtils;
 import com.huawei.flowcontrol.service.InterceptorSupporter;
 
 import com.huaweicloud.sermant.core.common.LoggerFactory;
@@ -118,9 +119,12 @@ public class FeignRequestInterceptor extends InterceptorSupporter {
 
     private Request getRequest(ExecuteContext context) {
         final Request request = (Request) context.getArguments()[0];
+        String serviceName = FlowControlServiceMeta.getInstance().getServiceName();
+        if (StringUtils.isEmpty(serviceName)) {
+            return request;
+        }
         final HashMap<String, Collection<String>> headers = new HashMap<>(request.headers());
-        headers.put(ConfigConst.FLOW_REMOTE_SERVICE_NAME_HEADER_KEY,
-                Collections.singletonList(FlowControlServiceMeta.getInstance().getServiceName()));
+        headers.put(ConfigConst.FLOW_REMOTE_SERVICE_NAME_HEADER_KEY, Collections.singletonList(serviceName));
         final Request newRequest = Request
                 .create(request.method(), request.url(), headers, request.body(), request.charset());
         context.getArguments()[0] = newRequest;
