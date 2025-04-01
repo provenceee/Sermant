@@ -5,7 +5,7 @@ tag.transmission.config:
   # 需要透传的流量标签的key的匹配规则, 支持精确、前缀、后缀匹配
   matchRule:
     # 精确匹配规则，为列表形式。若列表中的某个元素与标签键相同，则表示该标签需要透传。示例值为["id", "name"]
-    exact: ["id", "name"]
+    exact: ["id", "name", "x-cse-canary"]
     # 前缀匹配规则，为列表形式。若列表中的某个元素是标签键的前缀，则表示该标签需要透传。示例值为["x-sermant-"]
     prefix: ["x-sermant-"]
     # 后缀匹配规则，为列表形式。若列表中的某个元素是标签键的后缀，则表示该标签需要透传。示例值为["-sermant"]

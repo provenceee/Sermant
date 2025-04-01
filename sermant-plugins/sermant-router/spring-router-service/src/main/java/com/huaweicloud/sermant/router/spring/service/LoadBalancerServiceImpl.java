@@ -16,10 +16,14 @@
 
 package com.huaweicloud.sermant.router.spring.service;
 
+import com.huaweicloud.sermant.core.utils.tag.TrafficTag;
+import com.huaweicloud.sermant.core.utils.tag.TrafficUtils;
 import com.huaweicloud.sermant.router.common.request.RequestData;
 import com.huaweicloud.sermant.router.spring.handler.HandlerChainEntry;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * BaseLoadBalancerInterceptor服务
@@ -30,6 +34,14 @@ import java.util.List;
 public class LoadBalancerServiceImpl implements LoadBalancerService {
     @Override
     public List<Object> getTargetInstances(String targetName, List<Object> instances, RequestData requestData) {
+        TrafficTag trafficTag = TrafficUtils.getTrafficTag();
+
+        if (requestData != null && trafficTag != null && trafficTag.getTag() != null) {
+            Map<String, List<String>> newRequestHeader = new HashMap<>();
+            newRequestHeader.putAll(trafficTag.getTag());
+            newRequestHeader.putAll(requestData.getTag());
+            requestData = new RequestData(newRequestHeader, requestData.getPath(), requestData.getHttpMethod());
+        }
         return HandlerChainEntry.INSTANCE.process(targetName, instances, requestData);
     }
 }
