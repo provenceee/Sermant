@@ -16,6 +16,7 @@
 
 package com.huaweicloud.sermant.router.spring.service;
 
+import com.huaweicloud.sermant.core.common.LoggerFactory;
 import com.huaweicloud.sermant.core.utils.tag.TrafficTag;
 import com.huaweicloud.sermant.core.utils.tag.TrafficUtils;
 import com.huaweicloud.sermant.router.common.request.RequestData;
@@ -24,6 +25,7 @@ import com.huaweicloud.sermant.router.spring.handler.HandlerChainEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * BaseLoadBalancerInterceptor服务
@@ -32,15 +34,26 @@ import java.util.Map;
  * @since 2022-07-20
  */
 public class LoadBalancerServiceImpl implements LoadBalancerService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger();
+
     @Override
     public List<Object> getTargetInstances(String targetName, List<Object> instances, RequestData requestData) {
         TrafficTag trafficTag = TrafficUtils.getTrafficTag();
-
         if (requestData != null && trafficTag != null && trafficTag.getTag() != null) {
+            LOGGER.info("sermant getTargetInstances: intercept");
             Map<String, List<String>> newRequestHeader = new HashMap<>();
             newRequestHeader.putAll(trafficTag.getTag());
             newRequestHeader.putAll(requestData.getTag());
             requestData = new RequestData(newRequestHeader, requestData.getPath(), requestData.getHttpMethod());
+        }
+        if (requestData == null) {
+            LOGGER.info("sermant getTargetInstances: requestData is null");
+        } else {
+            LOGGER.info("sermant getTargetInstances: requestData path=" + requestData.getPath() + " httpMethod=" + requestData.getHttpMethod());
+            if (requestData.getTag() != null && !requestData.getTag().isEmpty()) {
+                LOGGER.info("sermant getTargetInstances: requestData tags=" + requestData.getTag().toString());
+            }
         }
         return HandlerChainEntry.INSTANCE.process(targetName, instances, requestData);
     }
