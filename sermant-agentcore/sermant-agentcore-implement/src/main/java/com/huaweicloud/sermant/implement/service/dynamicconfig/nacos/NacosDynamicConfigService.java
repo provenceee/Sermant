@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -82,8 +83,6 @@ public class NacosDynamicConfigService extends DynamicConfigService {
     private static final String KEY_TOKEN_TTL = "tokenTtl";
 
     private static final String KEY_DATA_ID = "dataId";
-
-    private static final String KEY_PAGE_ITEMS = "pageItems";
 
     private static final String KEY_GROUP = "group";
 
@@ -136,7 +135,7 @@ public class NacosDynamicConfigService extends DynamicConfigService {
      * 构造函数：编译正则表达式、初始化List
      */
     public NacosDynamicConfigService() {
-        listeners = new ArrayList<>();
+        listeners = new CopyOnWriteArrayList<>();
         serviceMeta = ConfigManager.getConfig(ServiceMeta.class);
     }
 
@@ -303,7 +302,7 @@ public class NacosDynamicConfigService extends DynamicConfigService {
             return Collections.emptyList();
         }
         String validGroup = NacosUtils.reBuildGroup(group);
-        List<String> resultList = getGroupKeys(validGroup).get(validGroup);
+        List<String> resultList = getGroupKeys().get(validGroup);
         return CollectionUtils.isEmpty(resultList) ? Collections.emptyList() : resultList;
     }
 
@@ -397,13 +396,12 @@ public class NacosDynamicConfigService extends DynamicConfigService {
      * 定时更新组监听器
      */
     private void updateConfigListener() {
-
+        Map<String, List<String>> groupKeys = getGroupKeys();
         for (NacosListener nacosListener : listeners) {
             if (!nacosListener.getType().equals(TYPE_GROUP)) {
                 continue;
             }
             String group = nacosListener.getGroup();
-            Map<String, List<String>> groupKeys = getGroupKeys(group);
             List<String> truthKeys = groupKeys.getOrDefault(group, Collections.emptyList());
             if (CollectionUtils.isEmpty(truthKeys)) {
                 continue;
@@ -432,14 +430,13 @@ public class NacosDynamicConfigService extends DynamicConfigService {
      *
      * @return group和其所有的keys组成的Map
      */
-    private Map<String, List<String>> getGroupKeys(String group) {
-        final String httpResult = doRequest(buildUrl(group));
+    private Map<String, List<String>> getGroupKeys() {
+        final String httpResult = doRequest(buildUrl());
         if ("".equals(httpResult)) {
-            return new HashMap<>();
+            return Collections.emptyMap();
         }
         Map<String, List<String>> groupKeys = new HashMap<>();
-        JSONObject jsonObject = JSONObject.parseObject(httpResult);
-        JSONArray pageItems = jsonObject.getJSONArray(KEY_PAGE_ITEMS);
+        JSONArray pageItems = JSONArray.parseArray(httpResult);
 
         for (int i = 0; i < pageItems.size(); i++) {
             JSONObject itemObject = pageItems.getJSONObject(i);
@@ -457,17 +454,11 @@ public class NacosDynamicConfigService extends DynamicConfigService {
      *
      * @return url
      */
-    private String buildUrl(String group) {
+    private String buildUrl() {
         final StringBuilder requestUrl = new StringBuilder().append(HTTP_PROTOCOL);
-        int pageSize = Integer.MAX_VALUE;
         requestUrl.append(CONFIG.getServerAddress())
-                .append("/nacos/v1/cs/configs?dataId=&group=")
-                .append(StringUtils.isBlank(group) ? StringUtils.EMPTY : group)
-                .append("&appName=&config_tags=&pageNo=1&pageSize=")
-                .append(pageSize)
-                .append("&tenant=")
-                .append(serviceMeta.getProject())
-                .append("&search=accurate");
+                .append("/nacos/v1/cs/history/configs?tenant=")
+                .append(serviceMeta.getProject());
         if (CONFIG.isEnableAuth()) {
             String accessToken = getToken();
             requestUrl.append("&accessToken=")
