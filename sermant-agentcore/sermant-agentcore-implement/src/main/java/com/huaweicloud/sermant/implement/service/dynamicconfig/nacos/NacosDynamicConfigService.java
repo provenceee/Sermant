@@ -149,7 +149,7 @@ public class NacosDynamicConfigService extends DynamicConfigService {
                     serviceMeta.getProject());
         }
         scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
-        scheduledThreadPoolExecutor.scheduleWithFixedDelay(this::updateConfigListener, UPDATE_TIME_INTERVAL,
+        scheduledThreadPoolExecutor.scheduleWithFixedDelay(this::updateConfigListenerWithCatch, UPDATE_TIME_INTERVAL,
                 UPDATE_TIME_INTERVAL,
                 TimeUnit.MILLISECONDS);
     }
@@ -390,6 +390,17 @@ public class NacosDynamicConfigService extends DynamicConfigService {
             list.add(nacosListener);
         }
         return list;
+    }
+
+    /**
+     * 定时更新组监听器
+     */
+    private void updateConfigListenerWithCatch() {
+        try {
+            updateConfigListener();
+        } catch (Throwable th) {
+            LOGGER.log(Level.SEVERE, "Nacos add listener failed.", th);
+        }
     }
 
     /**
