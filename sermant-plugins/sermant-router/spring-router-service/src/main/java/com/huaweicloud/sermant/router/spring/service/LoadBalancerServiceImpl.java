@@ -42,9 +42,23 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         TrafficTag trafficTag = TrafficUtils.getTrafficTag();
         if (requestData != null && trafficTag != null && trafficTag.getTag() != null) {
             LOGGER.info("sermant getTargetInstances: intercept");
-            Map<String, List<String>> newRequestHeader = new HashMap<>();
-            newRequestHeader.putAll(trafficTag.getTag());
-            newRequestHeader.putAll(requestData.getTag());
+            Map<String, List<String>> newRequestHeader = requestData.getTag();
+            trafficTag.getTag().forEach((key, trafficValues) -> {
+                if (newRequestHeader.containsKey(key)) {
+                    List<String> values = newRequestHeader.get(key);
+                    if (values == null || values.isEmpty()) {
+                        newRequestHeader.put(key, trafficValues);
+                        return;
+                    }
+                    if (trafficValues != null && !trafficValues.isEmpty()) {
+                        trafficValues.forEach(trafficValue -> {
+                            if (!values.contains(trafficValue)) {
+                                values.add(trafficValue);
+                            }
+                        });
+                    }
+                }
+            });
             requestData = new RequestData(newRequestHeader, requestData.getPath(), requestData.getHttpMethod());
         }
         if (requestData == null) {
