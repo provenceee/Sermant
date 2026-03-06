@@ -23,6 +23,7 @@ import com.huaweicloud.sermant.router.common.utils.ThreadLocalUtils;
 import com.huaweicloud.sermant.router.transmit.BaseTest;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -32,6 +33,12 @@ import org.junit.Test;
  * @since 2024-01-16
  */
 public class CallableWrapperTest extends BaseTest {
+    @Before
+    public void clear() {
+        ThreadLocalUtils.removeRequestTag();
+        ThreadLocalUtils.removeRequestData();
+    }
+
     @Test
     public void testCanTransmit() throws Exception {
         Object obj = new Object();
@@ -46,8 +53,8 @@ public class CallableWrapperTest extends BaseTest {
 
         Assert.assertEquals(obj, wrapper.call());
 
-        Assert.assertNull(ThreadLocalUtils.getRequestData());
-        Assert.assertNull(ThreadLocalUtils.getRequestTag());
+        Assert.assertNotNull(ThreadLocalUtils.getRequestData());
+        Assert.assertNotNull(ThreadLocalUtils.getRequestTag());
     }
 
     @Test
