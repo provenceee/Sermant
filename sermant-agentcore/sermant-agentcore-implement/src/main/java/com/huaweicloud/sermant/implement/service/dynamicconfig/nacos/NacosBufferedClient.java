@@ -27,6 +27,7 @@ import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
+import com.alibaba.nacos.common.remote.PayloadRegistry;
 
 import java.io.Closeable;
 import java.util.Optional;
@@ -243,16 +244,18 @@ public class NacosBufferedClient implements Closeable {
             // nacos的客户端初始化时候会获取当前线程的类加载器，此处需要更改，并且随后改回原本类加载器
             ClassLoader tempClassLoader = Thread.currentThread().getContextClassLoader();
             Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+            PayloadRegistry.init();
             configService = NacosFactory.createConfigService(properties);
-            Thread.currentThread().setContextClassLoader(tempClassLoader);
-            if (KEY_CONNECTED.equals(configService.getServerStatus())) {
-                return true;
-            }
             try {
+                if (KEY_CONNECTED.equals(configService.getServerStatus())) {
+                    return true;
+                }
                 Thread.sleep(CONFIG.getConnectTimeout());
                 LOGGER.log(Level.INFO, "The {0} times to retry to connect to nacos", tryNum);
             } catch (InterruptedException e) {
                 LOGGER.log(Level.SEVERE, "Nacos connection sleep exception, msg is: {0}", e.getMessage());
+            } finally {
+                Thread.currentThread().setContextClassLoader(tempClassLoader);
             }
         }
         return false;
