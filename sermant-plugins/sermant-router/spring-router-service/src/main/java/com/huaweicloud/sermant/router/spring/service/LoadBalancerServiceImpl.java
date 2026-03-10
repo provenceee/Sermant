@@ -57,6 +57,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                             }
                         });
                     }
+                } else {
+                    newRequestHeader.put(key, trafficValues);
                 }
             });
             requestData = new RequestData(newRequestHeader, requestData.getPath(), requestData.getHttpMethod());
