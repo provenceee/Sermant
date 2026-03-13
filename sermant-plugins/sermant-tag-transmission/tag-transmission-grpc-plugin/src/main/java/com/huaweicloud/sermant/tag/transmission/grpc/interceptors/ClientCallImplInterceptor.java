@@ -66,6 +66,12 @@ public class ClientCallImplInterceptor extends AbstractClientInterceptor<Metadat
             if (!TagKeyMatcher.isMatch(key)) {
                 continue;
             }
+
+            String originalHeaderValue = header.get(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER));
+            if (originalHeaderValue != null) {
+                continue;
+            }
+
             List<String> values = entry.getValue();
 
             // server端在标签值不为null的情况下转为list存储，为null时直接put null，因此在client端values为空必定是null

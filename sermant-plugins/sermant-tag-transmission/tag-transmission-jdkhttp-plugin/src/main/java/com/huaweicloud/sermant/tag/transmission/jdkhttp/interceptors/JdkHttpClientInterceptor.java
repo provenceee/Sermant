@@ -84,6 +84,13 @@ public class JdkHttpClientInterceptor extends AbstractClientInterceptor<MessageH
             if (!TagKeyMatcher.isMatch(key)) {
                 continue;
             }
+
+            // if original headers contains the specific key, then ignore
+            Map<String, List<String>> originalHeaders = messageHeader.getHeaders();
+            if (!CollectionUtils.isEmpty(originalHeaders.get(key))) {
+                continue;
+            }
+
             List<String> values = entry.getValue();
 
             // server端在标签值不为null的情况下转为list存储，为null时直接put null，因此在client端values为空必定是null

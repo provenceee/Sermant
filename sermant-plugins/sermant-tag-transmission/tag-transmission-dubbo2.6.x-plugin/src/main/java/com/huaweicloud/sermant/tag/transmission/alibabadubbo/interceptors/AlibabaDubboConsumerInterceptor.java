@@ -71,6 +71,12 @@ public class AlibabaDubboConsumerInterceptor extends AbstractClientInterceptor<R
             if (!TagKeyMatcher.isMatch(key)) {
                 continue;
             }
+
+            String originalAttachment = invocation.getAttachment(key);
+            if (originalAttachment != null) {
+                continue;
+            }
+
             List<String> values = entry.getValue();
 
             // provider端在标签值不为null的情况下转为list存储，为null时直接put null，因此在consumer端values为空必定是null

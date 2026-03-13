@@ -24,6 +24,7 @@ import com.huaweicloud.sermant.tag.transmission.config.strategy.TagKeyMatcher;
 import com.huaweicloud.sermant.tag.transmission.interceptors.AbstractClientInterceptor;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 
 import java.nio.charset.StandardCharsets;
@@ -69,6 +70,12 @@ public class KafkaProducerInterceptor extends AbstractClientInterceptor<Producer
             if (!TagKeyMatcher.isMatch(key)) {
                 continue;
             }
+
+            Header originalHeader = headers.lastHeader(key);
+            if (originalHeader != null) {
+                continue;
+            }
+
             List<String> values = entry.getValue();
 
             // producer端在标签值不为null的情况下转为list存储，为null时直接put null，因此在consumer端values为空必定是null

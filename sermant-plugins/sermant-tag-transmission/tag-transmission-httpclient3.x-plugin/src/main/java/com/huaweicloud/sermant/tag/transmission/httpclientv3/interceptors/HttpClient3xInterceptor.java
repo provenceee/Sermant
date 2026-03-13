@@ -23,6 +23,7 @@ import com.huaweicloud.sermant.core.utils.tag.TrafficUtils;
 import com.huaweicloud.sermant.tag.transmission.config.strategy.TagKeyMatcher;
 import com.huaweicloud.sermant.tag.transmission.interceptors.AbstractClientInterceptor;
 
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethod;
 
 import java.util.List;
@@ -66,6 +67,12 @@ public class HttpClient3xInterceptor extends AbstractClientInterceptor<HttpMetho
             if (!TagKeyMatcher.isMatch(key)) {
                 continue;
             }
+
+            Header originalRequestHeader = httpMethod.getRequestHeader(key);
+            if (originalRequestHeader != null) {
+                continue;
+            }
+
             List<String> values = entry.getValue();
 
             // server端在标签值不为null的情况下转为list存储，为null时直接put null，因此在client端values为空必定是null

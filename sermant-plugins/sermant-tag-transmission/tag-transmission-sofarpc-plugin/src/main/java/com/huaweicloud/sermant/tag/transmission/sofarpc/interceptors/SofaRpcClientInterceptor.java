@@ -69,6 +69,12 @@ public class SofaRpcClientInterceptor extends AbstractClientInterceptor<SofaRequ
             if (!TagKeyMatcher.isMatch(key)) {
                 continue;
             }
+
+            Object originalHeader = sofaRequest.getRequestProp(key);
+            if (originalHeader != null) {
+                continue;
+            }
+
             List<String> values = entry.getValue();
 
             // server端在标签值不为null的情况下转为list存储，为null时直接put null，因此在client端values为空必定是null

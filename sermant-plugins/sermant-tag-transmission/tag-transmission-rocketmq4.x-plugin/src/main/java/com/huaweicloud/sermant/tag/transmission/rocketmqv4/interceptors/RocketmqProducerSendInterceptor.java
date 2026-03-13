@@ -87,6 +87,11 @@ public class RocketmqProducerSendInterceptor extends AbstractClientInterceptor<S
             if (!TagKeyMatcher.isMatch(key)) {
                 continue;
             }
+
+            if (oldProperties.contains(key)) {
+                continue;
+            }
+
             List<String> values = entry.getValue();
             newProperties.append(key);
             newProperties.append(LINK_MARK);

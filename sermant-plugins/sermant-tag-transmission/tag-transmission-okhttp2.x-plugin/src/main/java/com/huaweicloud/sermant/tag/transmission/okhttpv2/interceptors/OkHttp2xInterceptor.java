@@ -19,14 +19,17 @@ package com.huaweicloud.sermant.tag.transmission.okhttpv2.interceptors;
 import com.huaweicloud.sermant.core.common.LoggerFactory;
 import com.huaweicloud.sermant.core.plugin.agent.entity.ExecuteContext;
 import com.huaweicloud.sermant.core.utils.CollectionUtils;
+import com.huaweicloud.sermant.core.utils.ReflectUtils;
 import com.huaweicloud.sermant.core.utils.tag.TrafficUtils;
 import com.huaweicloud.sermant.tag.transmission.config.strategy.TagKeyMatcher;
 import com.huaweicloud.sermant.tag.transmission.interceptors.AbstractClientInterceptor;
 
+import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.Request.Builder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,6 +78,16 @@ public class OkHttp2xInterceptor extends AbstractClientInterceptor<Builder> {
             if (!TagKeyMatcher.isMatch(key)) {
                 continue;
             }
+
+            Optional<Object> headersBuilderObject = ReflectUtils.getFieldValue(builder, "headers");
+            if (headersBuilderObject.isPresent()) {
+                Headers.Builder headersBuilder = (Headers.Builder) headersBuilderObject.get();
+                String value = headersBuilder.get(key);
+                if (value != null) {
+                    continue;
+                }
+            }
+
             List<String> values = entry.getValue();
 
             // server端在标签值不为null的情况下转为list存储，为null时直接put null，因此在client端values为空必定是null
