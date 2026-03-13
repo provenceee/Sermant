@@ -37,7 +37,7 @@ public class RequestTag {
      * @param tag 请求标记 header/attachment
      */
     public RequestTag(Map<String, List<String>> tag) {
-        this.tag = CollectionUtils.isEmpty(tag) ? new HashMap<>() : tag;
+        this.tag = CollectionUtils.isEmpty(tag) ? new HashMap<>() : new HashMap<>(tag);
     }
 
     public Map<String, List<String>> getTag() {

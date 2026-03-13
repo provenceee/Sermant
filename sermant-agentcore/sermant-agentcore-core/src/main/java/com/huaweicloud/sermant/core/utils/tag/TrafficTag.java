@@ -37,7 +37,7 @@ public class TrafficTag {
      * @param tag 流量标签 http请求的header/dubbo请求的attachment/消息队列header或properties
      */
     public TrafficTag(Map<String, List<String>> tag) {
-        this.tag = MapUtils.isEmpty(tag) ? new HashMap<>() : tag;
+        this.tag = MapUtils.isEmpty(tag) ? new HashMap<>() : new HashMap<>(tag);
     }
 
     public Map<String, List<String>> getTag() {
