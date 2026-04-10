@@ -30,11 +30,11 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
-                <module>sermant-flowcontrol</module>
+                <!--<module>sermant-flowcontrol</module>
                 <module>sermant-service-registry</module>
-                <module>sermant-dynamic-config</module>
+                <module>sermant-dynamic-config</module>-->
                 <module>sermant-router</module>
-                <module>sermant-loadbalancer</module>
+                <!--<module>sermant-loadbalancer</module>
                 <module>sermant-springboot-registry</module>
                 <module>sermant-mq-consume-prohibition</module>
                 <module>sermant-monitor</module>
@@ -44,7 +44,7 @@
                 <module>sermant-tag-transmission</module>
                 <module>sermant-database-write-prohibition</module>
                 <module>sermant-mq-grayscale</module>
-                <module>sermant-xds</module>
+                <module>sermant-xds</module>-->
             </modules>
             <build>
                 <pluginManagement>

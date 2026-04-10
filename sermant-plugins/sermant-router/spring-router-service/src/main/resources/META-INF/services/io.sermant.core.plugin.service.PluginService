@@ -3,3 +3,4 @@
 #
 io.sermant.router.spring.service.LaneServiceImpl
 io.sermant.router.spring.service.LoadBalancerServiceImpl
+io.sermant.router.spring.service.DebugServiceImpl
